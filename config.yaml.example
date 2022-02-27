@@ -1,0 +1,23 @@
+retry:
+  timeout: 120 # how long before giving up retrying and raise the exception
+  multiplier: 2 # how to generate next waiting time from current waiting time
+
+db:
+    host: localhost
+    port: 3306
+    username:
+    password:
+    database:
+rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+    prefetch:
+    exchange:
+    ttl:
+    dlx_exchange_key:
+    request_queue:
+    response_queue:
+    incoming_routing_key:
+    outgoing_routing_key:
