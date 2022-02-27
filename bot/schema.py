@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Union
 
 from pydantic import BaseModel
 
@@ -8,11 +8,11 @@ class IncomingMessageSchema(BaseModel):
     body: str
     fromMe: Optional[bool] = False
     self: Optional[int] = 0
-    isForwarded: bool
+    isForwarded: Optional[bool] = False
     author: str
     time: int
     chatId: str
     type: str
     senderName: str
-    caption: Optional[str] = None
-    quotedMsgId: Optional[str] = None
+    caption: Union[str, None] = None
+    quotedMsgId: Union[str, int, None] = None

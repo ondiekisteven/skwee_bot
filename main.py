@@ -83,24 +83,26 @@ class WhatsAPI:
 
             m = _get_message(json_body)
 
-            logger.info(f"sender: {m['senderName']}")
-            logger.info(f"message: {m['body']}")
             if json_body['chat'] is not None:
                 logger.info('')
                 logger.info('')
                 logger.info('------------------------------ -----------------')
                 logger.info('------ RECEIVED CHAT MESSAGE FROM QUEUE --------')
                 logger.info('-------------------------------- ---------------')
-                logger.info(json_body)
+                logger.debug(json_body)
+                logger.info(f"sender: {m['senderName']}")
+                logger.info(f"message: {m['body']}")
 
                 resp = Whatsapp(IncomingMessageSchema(**m)).response()
+                logger.info(f"response: {resp}")
                 await self.publish({
                     'chat_id': m['chatId'],
                     'message': resp,
                     'type': 'chat'}
                 )
             else:
-                logger.info("NO CHAT FOUND. THAT'S PROBABLY A STATUS UPDATE")
+                logger.info(f"NO CHAT FOUND. THAT'S PROBABLY A STATUS UPDATE FROM"
+                            f" {json_body['sender']['name'] or json_body['chat']['contact']['formattedName']}")
 
         except JSONDecodeError as e:
             logger.info("ERROR ON INPUT")
