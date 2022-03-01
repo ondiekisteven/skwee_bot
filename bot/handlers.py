@@ -29,7 +29,7 @@ def lyrics(message: IncomingMessageSchema):
         logger.warning(str(e))
         return "Could not find lyrics"
     except Exception as e:
-        logger.warning(str(e))
+        logger.exception(str(e))
         return "Error getting lyrics. Try again some time later"
 
     return song_lyrics
