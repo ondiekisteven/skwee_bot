@@ -1,4 +1,4 @@
-aio-pika==7.0.1
+aio-pika==7.1.0
 cfg_load[all]
 riprova~=0.2.7
 pydantic~=1.9.0

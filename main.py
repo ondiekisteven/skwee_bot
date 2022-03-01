@@ -93,7 +93,7 @@ class WhatsAPI:
                 logger.info(f"sender: {m['senderName']}")
                 logger.info(f"message: {m['body']}")
 
-                resp = Whatsapp(IncomingMessageSchema(**m)).response()
+                resp = Whatsapp(IncomingMessageSchema(**m), cfg=confg).response()
                 logger.info(f"response: {resp}")
                 await self.publish({
                     'chat_id': m['chatId'],
@@ -130,9 +130,9 @@ class WhatsAPI:
             logger.warning(error_message)
 
         except KeyError as e:
-            logger.info(str(e))
-            logger.info('DISCARDING MESSAGE')
-            return
+            logger.exception(str(e))
+            logger.info('PROBABLY INVALID CONFIG?')
+            raise
 
     async def message_callback(self, message: aio_pika.IncomingMessage):
 

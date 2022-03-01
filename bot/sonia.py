@@ -16,9 +16,10 @@ class MessageHandler(enum.Enum):
 
 
 class Whatsapp:
-    def __init__(self, message: IncomingMessageSchema, loop=None):
+    def __init__(self, message: IncomingMessageSchema, cfg: dict, loop=None):
         self.message: IncomingMessageSchema = message
         self.loop = loop
+        self.cfg = cfg
 
     def _get_handler(self):
         text = self.message.body
@@ -36,6 +37,6 @@ class Whatsapp:
             if inspect.iscoroutinefunction(fn):
                 resp = self.loop.run_until_complete(fn)
             else:
-                resp = fn(self.message)
+                resp = fn(self.message, self.cfg)
             return resp
         logger.info("THIS MESSAGE IS NOT KNOWN")

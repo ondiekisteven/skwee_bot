@@ -9,15 +9,15 @@ from bot.schema import IncomingMessageSchema
 logger = logging.getLogger(__name__)
 
 
-def registration(message: IncomingMessageSchema):
+def registration(message: IncomingMessageSchema, cfg: dict):
     return f'Welcome {message.senderName if message.senderName is not None else ""} to our super duper nice bot. Type ' \
            f'"lyrics" to get lyrics. '
 
 
-def lyrics(message: IncomingMessageSchema):
+def lyrics(message: IncomingMessageSchema, cfg: dict):
     text = message.body
     search_term = ' '.join(text.split()[1:])
-    genius = Genius()
+    genius = Genius(cfg)
     logger.info(f'searching lyrics for {search_term}')
     sid = genius.search_song(search_term)
     if 'Could not find' in sid:

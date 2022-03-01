@@ -1,3 +1,5 @@
+import os
+
 import aiohttp
 import json
 
@@ -9,18 +11,20 @@ from lyricsgenius import Genius as GeniusLyrics
 
 
 class Genius:
-    def __init__(self, aiohttp_session: ClientSession = None):
-        self.token = 'ixSPr24nAw6FnPZVDGWpWPl40zirdftUk6x7gO5llceXb2v-Ey2Q7SBQaJ9QKksm'
+    def __init__(self, cfg: dict, aiohttp_session: ClientSession = None):
+        self.token = cfg['genius']['token']
         self.APIUrl = 'https://api.genius.com/'
         self.session = aiohttp_session
 
     def lyrics(self, song_id):
+        print(f"song_id: {song_id}")
         return GeniusLyrics(self.token).lyrics(song_id)
 
     def get_header(self):
         header = {
             'Authorization': f'Bearer {self.token}',
-            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/537.36'
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/537.36 (KHTML, like Gecko) '
+                          'Chrome/50.0.2661.102 Safari/537.36 '
         }
         return header
 
