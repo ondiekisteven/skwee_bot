@@ -76,18 +76,17 @@ class Genius:
         result = json.loads(result)
         if result['meta']['status'] == 200:
             try:
-                pass
+                song = result['response']['hits'][0]['result']
+                song_id = song['id']
+                song_title = song['full_title']
+                song_thumbnail = song['header_image_thumbnail_url']
+                return {
+                    'song_id': song_id,
+                    'song_title': song_title,
+                    'song_thumbnail': song_thumbnail
+                }
             except IndexError:
                 return "Could not find song"
-            song = result['response']['hits'][0]['result']
-            song_id = song['id']
-            song_title = song['full_title']
-            song_thumbnail = song['header_image_thumbnail_url']
-            return {
-                'song_id': song_id,
-                'song_title': song_title,
-                'song_thumbnail': song_thumbnail
-            }
         else:
             return 'Could not find song'
 

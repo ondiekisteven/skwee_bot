@@ -23,19 +23,24 @@ def on_retry(err, next_try):
 
 
 def _get_message(d: dict):
-    return {'id': d['id'],
-            'body': d['body'],
-            "fromMe": False,
-            "self": 0,
-            "isForwarded": d["isForwarded"],
-            'author': d['sender']['id']['_serialized'],
-            'time': d['t'],
-            'chatId': d['chatId']['_serialized'],
-            'type': d['type'],
-            'senderName': d['sender']['name'] or d['chat']['contact']['formattedName'],
-            'caption': d['caption'],
-            'quotedMsgId': d['quotedMsg']
-            }
+    try:
+
+        return {'id': d['id'],
+                'body': d['body'],
+                "fromMe": False,
+                "self": 0,
+                "isForwarded": d["isForwarded"],
+                'author': d['sender']['id']['_serialized'],
+                'time': d['t'],
+                'chatId': d['chatId']['_serialized'],
+                'type': d['type'],
+                'senderName': d['sender']['name'] or d['chat']['contact']['formattedName'] or '',
+                'caption': d['caption'],
+                'quotedMsgId': d['quotedMsg']
+                }
+    except Exception as e:
+        logger.info(f"ERROR :: {e.__class__.__name__} :: {str(e)} :: {d}")
+        return None
 
 
 class WhatsAPI:
@@ -82,6 +87,8 @@ class WhatsAPI:
             json_body = json.loads(message.body.decode('utf-8'))
 
             m = _get_message(json_body)
+            if m is None:
+                return
 
             if json_body['chat'] is not None:
                 logger.info('')
@@ -94,7 +101,7 @@ class WhatsAPI:
                 logger.info(f"message: {m['body']}")
 
                 resp = Whatsapp(IncomingMessageSchema(**m), cfg=confg).response()
-                logger.info(f"response: {resp}")
+                logger.debug(f"response: {resp}")
                 await self.publish({
                     'chat_id': m['chatId'],
                     'message': resp,
