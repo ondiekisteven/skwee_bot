@@ -3,7 +3,7 @@ import json
 import logging
 import sys
 from json import JSONDecodeError
-
+import requests
 import aio_pika
 import cfg_load
 import riprova as riprova
@@ -34,7 +34,7 @@ def _get_message(d: dict):
                 'time': d['t'],
                 'chatId': d['chatId']['_serialized'],
                 'type': d['type'],
-                'senderName': d['sender']['name'] or d['chat']['contact']['formattedName'] or '',
+                'chatName': d['sender']['name'] or d['chat']['contact']['formattedName'] or '',
                 'caption': d['caption'],
                 'quotedMsgId': d['quotedMsg']
                 }
@@ -75,11 +75,11 @@ class WhatsAPI:
                 await self.exchange.publish(message, routing_key=confg['rabbitmq']['outgoing_routing_key'])
             else:
                 logger.error('Rabbitmq exchange is empty or None')
-                raise
+
         except Exception as e:
             logger.info('ERROR PUBLISHING MESSAGE...')
             logger.exception(str(e))
-            raise
+            exit(5)
 
     async def _process(self, message: aio_pika.IncomingMessage):
 
@@ -91,24 +91,23 @@ class WhatsAPI:
                 return
 
             if json_body['chat'] is not None:
-                logger.info('')
-                logger.info('')
-                logger.info('------------------------------ -----------------')
-                logger.info('------ RECEIVED CHAT MESSAGE FROM QUEUE --------')
-                logger.info('-------------------------------- ---------------')
-                logger.debug(json_body)
-                logger.info(f"sender: {m['senderName']}")
+                logger.info('-----------------------------------------------')
+                logger.info(f"sender: {m['chatName']}")
                 logger.info(f"message: {m['body']}")
+                m['msisdn'] = m['author'].replace('@c.us', '')
 
-                resp = Whatsapp(IncomingMessageSchema(**m), cfg=confg).response()
-                logger.debug(f"response: {resp}")
-                await self.publish({
-                    'chat_id': m['chatId'],
-                    'message': resp,
-                    'type': 'chat'}
-                )
+                logger.info(m)
+                try:
+                    r = requests.post(confg['callback'], json={'messages': [m]})
+                except Exception as e:
+                    logger.error(str(e))
+                else:
+                    logger.info(f'{r.status_code} :: {r.text}')
+                finally:
+                    logger.info('-----------------------------------------------')
+
             else:
-                logger.info(f"NO CHAT FOUND. THAT'S PROBABLY A STATUS UPDATE FROM"
+                logger.info(f"STATUS UPDATE FROM"
                             f" {json_body['sender']['name'] or json_body['chat']['contact']['formattedName']}")
 
         except JSONDecodeError as e:
@@ -123,23 +122,21 @@ class WhatsAPI:
                 'result_details': str(e)
             }
             logger.warning(error_message)
+
         except ValidationError as e:
             logger.info("ERROR ON INPUT")
-            logger.error(f"[ValidationError]: {e}")
             error_message = {
                 'type': 'bundles',
-                'request': json_body,
                 'http_code': None,
                 'result_code': None,
                 'result_desc': "ValidationError",
-                'result_details': str(e).replace('\n', " '")
+                'result_details': e.__class__.__name__.__repr__()
             }
-            logger.warning(error_message)
+            logger.warning(e)
 
-        except KeyError as e:
-            logger.exception(str(e))
-            logger.info('PROBABLY INVALID CONFIG?')
-            raise
+        except Exception as x:
+            logger.exception(x)
+            exit(4)
 
     async def message_callback(self, message: aio_pika.IncomingMessage):
 

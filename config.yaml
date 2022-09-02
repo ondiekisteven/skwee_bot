@@ -1,0 +1,28 @@
+retry:
+  timeout: 120 # how long before giving up retrying and raise the exception
+  multiplier: 2 # how to generate next waiting time from current waiting time
+
+genius:
+  token: ixSPr24nAw6FnPZVDGWpWPl40zirdftUk6x7gO5llceXb2v-Ey2Q7SBQaJ9QKksm
+
+callback: http://localhost:8003/whatsapp/
+
+db:
+    host: localhost
+    port: 3308
+    username: root
+    password: secret
+    database: myAppDB
+rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+    prefetch: 300
+    exchange: skweedudo-wa
+    ttl: 3600000
+    dlx_exchange_key: 'dlx'
+    request_queue: 'skweedudo.wa.incoming'
+    response_queue: 'skweedudo.wa.outgoing'
+    incoming_routing_key: 'incoming'
+    outgoing_routing_key: 'outgoing'
