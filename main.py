@@ -98,7 +98,10 @@ class WhatsAPI:
 
                 logger.info(m)
                 try:
+                    logger.info(f"URL: {confg['callback']}")
                     r = requests.post(confg['callback'], json={'messages': [m]})
+
+                    logger.info(f'{r.status_code} :: {r.text}')
                 except Exception as e:
                     logger.error(str(e))
                 else:
